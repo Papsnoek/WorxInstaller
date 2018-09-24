@@ -142,6 +142,20 @@ if [[ $FREEMEM -lt 3096 ]]; then
 fi 
 }
 function install_binaries() {
+echo -e "${FgLtWhite}we're making .."
+echo -e "${FgLtGreen}      ___           ___           ___           ___      ";
+echo -e "     /\  \         /\  \         /\  \         /|  |     ";
+echo -e "    _\:\  \       /::\  \       /::\  \       |:|  |     ";
+echo -e "   /\ \:\  \     /:/\:\  \     /:/\:\__\      |:|  |     ";
+echo -e "  _\:\ \:\  \   /:/  \:\  \   /:/ /:/  /    __|:|__|     ";
+echo -e " /\ \:\ \:\__\ /:/__/ \:\__\ /:/_/:/__/___ /::::\__\_____";
+echo -e " \:\ \:\/:/  / \:\  \ /:/  / \:\/:::::/  / ~~~~\::::/___/";
+echo -e "  \:\ \::/  /   \:\  /:/  /   \::/~~/~~~~      |:|~~|    ";
+echo -e "   \:\/:/  /     \:\/:/  /     \:\~~\          |:|  |    ";
+echo -e "    \::/  /       \::/  /       \:\__\         |:|__|    ";
+echo -e "     \/__/         \/__/         \/__/         |/__/     ";
+echo -e "${FgLtBlue}"
+echo -e "Work.. Please be patient....${Off}"
 cd /tmp
 wget files.worxcoin.io/releases/6a86c1c/Worx-1.3.0.2-64bit-linux-NO-QT.tar.gz
 cd worx
@@ -149,6 +163,7 @@ mv worx* /usr/local/bin/
 cd ..
 rmdir worx
 rm Worx*.gz
+echo -e "Done."
 }
 
 function download_node() {
