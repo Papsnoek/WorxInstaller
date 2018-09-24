@@ -10,7 +10,7 @@ COIN_PATH='/usr/local/bin/'
 COIN_GIT='https://github.com/WorxCoin/worx.git'
 COIN_BACKUP='~/WorxBackup'
 COIN_TGZ=''
-COIN_BOOTSTRAP_URL='https://worxcoin.io/'
+COIN_BOOTSTRAP_URL='http://files.worxcoin.io/bootstrap.tar.gz'
 COIN_BOOTSTRAP_HASH=''
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
 COIN_NAME='Worx'
@@ -140,6 +140,15 @@ if [[ $FREEMEM -lt 3096 ]]; then
 	else
 	echo -e "Enough free ram available for compile to succeed, not checking swap"
 fi 
+}
+function install_binaries() {
+cd /tmp
+wget files.worxcoin.io/releases/6a86c1c/Worx-1.3.0.2-64bit-linux-NO-QT.tar.gz
+cd worx
+mv worx* /usr/local/bin/
+cd ..
+rmdir worx
+rm Worx*.gz
 }
 
 function download_node() {
@@ -541,10 +550,10 @@ function important_information_wallet() {
 function bootstrap() {
 
  echo -e "${BLUE}================================================================================================================================${NC}"
- echo -e "${RED}Bootstrapping Blockchain with IPFS hash ${WHITE}$COIN_BOOTSTRAP_HASH"
+ echo -e "${RED}Bootstrapping Blockchain"
  echo -e "${BLUE}================================================================================================================================${NC}"
   cd $CONFIGFOLDER
-  rm -rf blocks chainstate sporks banlist.dat peers.dat 2>/dev/null
+  rm -rf blocks chainstate database banlist.dat peers.dat 2>/dev/null
   echo -e "${CYAN}Downloading Bootstrap...${NC}"
   wget -q $COIN_BOOTSTRAP_URL -O bootstrap.tar.gz
   tar -zxvf bootstrap.tar.gz >/dev/null 2>&1
@@ -610,7 +619,8 @@ echo -e "${RED} ${RED}Dragon${FgLtMagenta}Lady${FgLtGreen} Flexi-compile edit $S
  echo -e "${BLUE}================================================================${NC}"
  echo -e "${WHITE}Main Menu"
  echo -e "${BLUE}===================${WHITE}Here are your options${BLUE}========================${NC}"
- echo -e "${GREEN}1:${NC}${FgLtYellow} Install full Masternode${NC}"
+ echo -e "${GREEN}1C:${NC}${FgLtYellow} Install full Masternode (Compiled from github source)${NC}"
+ echo -e "${GREEN}1D:${NC}${FgLtYellow} Install full Masternode (Download Precompiled Binaries)${NC}"
  echo -e "${GREEN}2:${NC}${FgLtYellow} Install CLI Staking Wallet Only${NC}"
  echo -e "${GREEN}3:${NC}${FgLtYellow} Quit and get me out of here${NC}"
  echo -e "${BLUE}================================================================${NC}"
@@ -625,9 +635,15 @@ mainmenu
 read -rp "Please select your choice: " opt
 
     case $opt in
-        "1")
+        "1C")
             echo "Lets do a masternode!";
-	doamasternode
+	doamasternodec
+	    echo -e "${Underline}Masternode Setup ${Blink}Complete${Off}${FgLtBlue}$!!!"
+            read -rp "Press any key to return to main menu" pause
+	    ;;
+        "1D")
+            echo "Lets do a masternode!";
+	doamasternoded
 	    echo -e "${Underline}Masternode Setup ${Blink}Complete${Off}${FgLtBlue}$!!!"
             read -rp "Press any key to return to main menu" pause
 	    ;;
@@ -663,17 +679,29 @@ done
 
 function syncwaitreboot() {
 
-ISSYNCHED=$($COIN_CLI_COMMAND |grep 'IsBlockchainSynced' |awk ' { print $2 } ')
+#ISSYNCHED=$($COIN_CLI_COMMAND |grep 'IsBlockchainSynced' |awk ' { print $2 } ')
 
 }
 
-function doamasternode() {
-
+function doamasternodec() {
+unset $DOWNLD
 clear
 preflightchecks
 download_node
 configure_systemd
-#bootstrap
+bootstrap
+setup_node
+startsystemd
+syncwaitreboot
+}
+
+function doamasternoded() {
+export DOWNLD=YES
+clear
+preflightchecks
+install_binaries
+configure_systemd
+bootstrap
 setup_node
 startsystemd
 syncwaitreboot
@@ -683,7 +711,9 @@ function preflightchecks() {
 purgeOldInstallation
 checks
 prepare_system
+if [[ ! $DOWNLD ]]; then
 memorycheck
+fi
 }
 
 function setup_node() {
