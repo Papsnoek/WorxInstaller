@@ -139,8 +139,9 @@ if [[ $FREEMEM -lt 3096 ]]; then
 	fi
 	else
 	echo -e "Enough free ram available for compile to succeed, not checking swap"
-fi 
+fi
 }
+
 function install_binaries() {
 echo -e "${FgLtWhite}we're making .."
 echo -e "${FgLtGreen}      ___           ___           ___           ___      ";
@@ -157,11 +158,13 @@ echo -e "     \/__/         \/__/         \/__/         |/__/     ";
 echo -e "${FgLtBlue}"
 echo -e "Work.. Please be patient....${Off}"
 cd /tmp
-wget files.worxcoin.io/releases/6a86c1c/Worx-1.3.0.2-64bit-linux-NO-QT.tar.gz
-cd worx
-mv worx* /usr/local/bin/
+wget files.worxcoin.io/releases/6a86c1c/Worx-1.3.0.2-64bit-linux-NO-QT.tar.gz > /dev/null 2>&1
+tar -zxvf Worx-1.3.0.2-64bit-linux-NO-QT.tar.gz > /dev/null 2>&1
+cd worx 
+mv worx* /usr/local/bin/ > /dev/null 2>&1
+mv lib/libbitcoin* /usr/local/lib/ 
 cd ..
-rmdir worx
+rm -rf worx
 rm Worx*.gz
 echo -e "Done."
 }
@@ -692,11 +695,6 @@ read -rp "Please select your choice: " opt
 done
 }
 
-function syncwaitreboot() {
-
-#ISSYNCHED=$($COIN_CLI_COMMAND |grep 'IsBlockchainSynced' |awk ' { print $2 } ')
-
-}
 
 function doamasternodec() {
 unset $DOWNLD
@@ -707,7 +705,6 @@ configure_systemd
 bootstrap
 setup_node
 startsystemd
-syncwaitreboot
 }
 
 function doamasternoded() {
@@ -719,7 +716,6 @@ configure_systemd
 bootstrap
 setup_node
 startsystemd
-syncwaitreboot
 }
 
 function preflightchecks() {
